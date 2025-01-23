@@ -24,26 +24,36 @@ class CronService {
 
   async initializeJobs() {
     try {
+      console.log("Starting cron initialization");
       this.cancelAllJobs();
+
+      console.log("Getting folder configs");
       const FolderConfigService = require("./folderConfigService");
       const configs = await FolderConfigService.getActiveFolderConfigs();
 
+      console.log("Folder configs received:", configs);
+
       for (const config of configs) {
+        console.log("Scheduling job for config:", config.folder_name);
         await this.scheduleJob(config);
       }
 
       logger.info(`Initialized ${this.jobs.size} cron jobs`);
     } catch (error) {
       logger.error("Error initializing cron jobs:", error);
+      console.error("Cron initialization error:", error);
       throw error;
     }
   }
 
   async scheduleJob(folderConfig) {
     try {
+      console.log("Starting job schedule for:", folderConfig.folder_name);
+      console.log("Cron expression:", folderConfig.cron_expression);
       const job = schedule.scheduleJob(
         folderConfig.cron_expression,
         async () => {
+          console.log("Job callback created");
           if (this.processingFolders.has(folderConfig.id)) {
             logger.info(
               `Previous job still running for ${folderConfig.folder_name}`
@@ -77,9 +87,16 @@ class CronService {
         }
       );
 
+      if (!job) {
+        console.error("Failed to create job - invalid cron expression");
+        return;
+      }
+
       this.jobs.set(folderConfig.id, job);
       logger.info(`Scheduled job for folder: ${folderConfig.folder_name}`);
+      console.log("Job scheduled successfully");
     } catch (error) {
+      console.error("Schedule job error:", error);
       logger.error(
         `Error scheduling job for folder ${folderConfig.folder_name}:`,
         error

@@ -6,22 +6,35 @@ const rateLimiter = require("../utils/rateLimiter");
 
 class YouTubeService {
   constructor() {
+    console.log("YouTube credentials check:", {
+      hasClientId: !!process.env.YOUTUBE_CLIENT_ID,
+      hasClientSecret: !!process.env.YOUTUBE_CLIENT_SECRET,
+      hasRedirectUri: !!process.env.YOUTUBE_REDIRECT_URI,
+      hasRefreshToken: !!process.env.YOUTUBE_REFRESH_TOKEN,
+    });
     this.oauth2Client = new google.auth.OAuth2(
       process.env.YOUTUBE_CLIENT_ID,
       process.env.YOUTUBE_CLIENT_SECRET,
       process.env.YOUTUBE_REDIRECT_URI
     );
 
+    console.log("Setting refresh token...");
     if (process.env.YOUTUBE_REFRESH_TOKEN) {
       this.oauth2Client.setCredentials({
         refresh_token: process.env.YOUTUBE_REFRESH_TOKEN,
       });
     }
 
-    this.youtube = google.youtube({
-      version: "v3",
-      auth: this.oauth2Client,
-    });
+    try {
+      this.youtube = google.youtube({
+        version: "v3",
+        auth: this.oauth2Client,
+      });
+      console.log("YouTube client initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize YouTube client:", error);
+      throw error;
+    }
 
     this.rateLimiter = rateLimiter;
     this.maxRetries = 3;

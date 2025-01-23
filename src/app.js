@@ -4,12 +4,18 @@ const logger = require("./utils/logger");
 const cronService = require("./services/cronService");
 const authRoutes = require("./routes/auth");
 
+// At the start of app.js
+console.log("Starting app...");
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// After Express app setup
+console.log("Express app configured");
 
 // Auth routes
 app.use("/auth", authRoutes);
