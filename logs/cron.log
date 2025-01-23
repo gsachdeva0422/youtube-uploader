@@ -1,0 +1,21 @@
+2025-01-23T19:04:00.052Z [info]: Processing video from folder: 1-video
+2025-01-23T19:04:00.054Z [info]: Found thumbnail: thumbnail.jpg
+2025-01-23T19:04:00.055Z [info]: Starting YouTube upload process: {"videoPath":"/Users/gauravsachdeva/Work/projects/gsachdeva0422/Projects/youtube-uploader/videos/riddles-videos/1-video/1-riddle.mp4","attempt":1,"maxAttempts":3}
+2025-01-23T19:04:00.055Z [info]: Test mode: Simulating successful upload
+2025-01-23T19:04:02.057Z [info]: Upload completed: {"videoId":"TEST-1737659042057","testMode":true}
+2025-01-23T19:04:02.073Z [info]: Moved file to archive: 1-riddle.mp4
+2025-01-23T19:04:02.073Z [info]: Moved file to archive: metadata.json
+2025-01-23T19:04:02.074Z [info]: Moved file to archive: thumbnail.jpg
+2025-01-23T19:04:02.074Z [info]: Successfully moved files to archive: {"sourceDir":"/Users/gauravsachdeva/Work/projects/gsachdeva0422/Projects/youtube-uploader/videos/riddles-videos/1-video","archiveDir":"/Users/gauravsachdeva/Work/projects/gsachdeva0422/Projects/youtube-uploader/videos/riddles-videos/archive/1-video","fileCount":3}
+2025-01-23T19:04:17.563Z [info]: Cron Status: {"activeJobs":1,"processingFolders":[],"quotaLimits":{},"lastRun":{"1":"2025-01-23T19:04:00.016Z"}}
+2025-01-23T19:05:17.567Z [info]: Cron Status: {"activeJobs":1,"processingFolders":[],"quotaLimits":{},"lastRun":{"1":"2025-01-23T19:04:00.016Z"}}
+2025-01-23T19:06:00.068Z [info]: Processing video from folder: 2-video
+2025-01-23T19:06:00.070Z [info]: Found thumbnail: thumbnail.png
+2025-01-23T19:06:00.070Z [info]: Starting YouTube upload process: {"videoPath":"/Users/gauravsachdeva/Work/projects/gsachdeva0422/Projects/youtube-uploader/videos/riddles-videos/2-video/2-riddle.mp4","attempt":1,"maxAttempts":3}
+2025-01-23T19:06:00.070Z [info]: Test mode: Simulating successful upload
+2025-01-23T19:06:02.073Z [info]: Upload completed: {"videoId":"TEST-1737659162072","testMode":true}
+2025-01-23T19:06:02.089Z [info]: Moved file to archive: 2-riddle.mp4
+2025-01-23T19:06:02.090Z [info]: Moved file to archive: metadata.json
+2025-01-23T19:06:02.090Z [info]: Moved file to archive: thumbnail.png
+2025-01-23T19:06:02.091Z [info]: Successfully moved files to archive: {"sourceDir":"/Users/gauravsachdeva/Work/projects/gsachdeva0422/Projects/youtube-uploader/videos/riddles-videos/2-video","archiveDir":"/Users/gauravsachdeva/Work/projects/gsachdeva0422/Projects/youtube-uploader/videos/riddles-videos/archive/2-video","fileCount":3}
+2025-01-23T19:06:17.568Z [info]: Cron Status: {"activeJobs":1,"processingFolders":[],"quotaLimits":{},"lastRun":{"1":"2025-01-23T19:06:00.027Z"}}

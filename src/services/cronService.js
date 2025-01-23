@@ -7,15 +7,16 @@ const path = require("path");
 class CronService {
   constructor() {
     this.jobs = new Map();
-    this.lastStatus = new Map(); // Track job status
-    this.isProcessing = false;
+    this.processingFolders = new Set();
+    this.lastStatus = new Map();
+    this.quotaLimits = new Map();
 
-    // Log status every minute
     setInterval(() => {
       const status = {
         activeJobs: this.jobs.size,
-        isProcessing: this.isProcessing,
-        lastRun: this.lastStatus,
+        processingFolders: Array.from(this.processingFolders),
+        quotaLimits: Object.fromEntries(this.quotaLimits),
+        lastRun: Object.fromEntries(this.lastStatus),
       };
       logger.info("Cron Status:", status);
     }, 60000);
@@ -23,10 +24,7 @@ class CronService {
 
   async initializeJobs() {
     try {
-      // Cancel any existing jobs
       this.cancelAllJobs();
-
-      // Get active folder configurations
       const FolderConfigService = require("./folderConfigService");
       const configs = await FolderConfigService.getActiveFolderConfigs();
 
@@ -46,17 +44,25 @@ class CronService {
       const job = schedule.scheduleJob(
         folderConfig.cron_expression,
         async () => {
-          if (this.isProcessing) {
+          if (this.processingFolders.has(folderConfig.id)) {
             logger.info(
-              `Previous job still running for ${folderConfig.folder_name}, skipping this run`
+              `Previous job still running for ${folderConfig.folder_name}`
             );
             return;
           }
 
-          this.isProcessing = true;
-          logger.info(
-            `Starting scheduled job for folder: ${folderConfig.folder_name}`
-          );
+          const quotaLimit = this.quotaLimits.get(folderConfig.id);
+          if (quotaLimit && quotaLimit > Date.now()) {
+            logger.info(
+              `Quota limit active for ${
+                folderConfig.folder_name
+              } until ${new Date(quotaLimit)}`
+            );
+            return;
+          }
+
+          this.processingFolders.add(folderConfig.id);
+          this.lastStatus.set(folderConfig.id, new Date());
 
           try {
             await this.processFolder(folderConfig);
@@ -66,7 +72,7 @@ class CronService {
               error
             );
           } finally {
-            this.isProcessing = false;
+            this.processingFolders.delete(folderConfig.id);
           }
         }
       );
@@ -87,15 +93,13 @@ class CronService {
       const VideoUploadModel = require("../models/videoUploadModel");
       const folders = await fs.readdir(folderConfig.folder_path);
 
-      // Filter out 'archive' folder, .DS_Store and other hidden files
       const pendingFolders = folders
-        .filter((folder) => {
-          return (
+        .filter(
+          (folder) =>
+            !folder.startsWith(".") &&
             folder !== "archive" &&
-            !folder.startsWith(".") && // Filters .DS_Store and other hidden files
             folder !== "Thumbs.db"
-          ); // Windows thumbnail file
-        })
+        )
         .sort((a, b) => {
           const numA = parseInt(a.split("-")[0]);
           const numB = parseInt(b.split("-")[0]);
@@ -107,11 +111,9 @@ class CronService {
         return;
       }
 
-      // Process the first folder (lowest number)
       const nextFolder = pendingFolders[0];
       const fullPath = path.join(folderConfig.folder_path, nextFolder);
 
-      // Check if video already exists in database
       const videoFiles = await fs.readdir(fullPath);
       const videoFile = videoFiles.find((file) => file.endsWith(".mp4"));
 
@@ -137,11 +139,11 @@ class CronService {
       );
 
       if (result.quotaExceeded) {
+        const retryAfter = new Date(result.retryAfter).getTime();
+        this.quotaLimits.set(folderConfig.id, retryAfter);
         logger.warn(
-          `Stopping cron job until ${result.retryAfter} due to quota limits`
+          `Quota exceeded for ${folderConfig.folder_name}, pausing until ${result.retryAfter}`
         );
-        this.pauseUntil = result.retryAfter;
-        return;
       }
     } catch (error) {
       logger.error(
@@ -156,12 +158,17 @@ class CronService {
       job.cancel();
     }
     this.jobs.clear();
-    this.isProcessing = false; // Reset processing flag
+    this.processingFolders.clear();
+    this.quotaLimits.clear();
     logger.info("Cancelled all cron jobs");
   }
 
   getActiveJobs() {
-    return Array.from(this.jobs.keys());
+    return {
+      jobs: Array.from(this.jobs.keys()),
+      processing: Array.from(this.processingFolders),
+      quotaLimits: Object.fromEntries(this.quotaLimits),
+    };
   }
 }
 

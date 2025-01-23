@@ -9,36 +9,29 @@ function tailLog(logFile) {
     fs.writeFileSync(logPath, "");
   }
 
-  let lastSize = 0;
   console.log(`Monitoring ${logFile}...`);
 
-  setInterval(() => {
-    const stats = fs.statSync(logPath);
-    if (stats.size > lastSize) {
-      const stream = fs.createReadStream(logPath, {
-        start: lastSize,
-        end: stats.size,
-      });
+  let buffer = "";
+  fs.watchFile(logPath, () => {
+    const data = fs.readFileSync(logPath, "utf8");
+    const lines = data.split("\n");
+    const newLines = lines.slice(-10); // Show last 10 lines
 
-      stream.on("data", (data) => {
-        const lines = data.toString().split("\n");
-        lines.forEach((line) => {
-          if (line.trim()) {
-            try {
-              const parsed = JSON.parse(line);
-              console.log(
-                `${parsed.timestamp} [${parsed.level}]: ${parsed.message}`
-              );
-            } catch (e) {
-              console.log(line);
-            }
-          }
-        });
-      });
-
-      lastSize = stats.size;
-    }
-  }, 1000);
+    newLines.forEach((line) => {
+      if (line.trim()) {
+        try {
+          const parsed = JSON.parse(line);
+          console.clear();
+          console.log(
+            `${parsed.timestamp} [${parsed.level}]: ${parsed.message}`
+          );
+          if (parsed.stack) console.log(parsed.stack);
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+    });
+  });
 }
 
-tailLog("combined.log");
+["error.log", "combined.log"].forEach(tailLog);

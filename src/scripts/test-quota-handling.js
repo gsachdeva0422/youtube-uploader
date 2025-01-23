@@ -13,7 +13,7 @@ async function testQuotaHandling() {
 
     const result = await VideoUploadService.processVideoUpload(
       configs[0].id,
-      process.env.BASE_VIDEOS_PATH + "/riddles-videos/3-video"
+      process.env.BASE_VIDEOS_PATH + "/riddles-videos/1-video"
     );
 
     if (result.quotaExceeded) {
