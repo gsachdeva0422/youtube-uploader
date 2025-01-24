@@ -45,6 +45,38 @@ class FolderConfigService {
       throw error;
     }
   }
+
+  static async getMetadataFromFolder(folderPath) {
+    const folders = await fs.readdir(folderPath);
+    const metadataFolders = [];
+
+    for (const folder of folders) {
+      const folderFullPath = path.join(folderPath, folder);
+      const metadataPath = path.join(folderFullPath, "metadata.json");
+      const thumbnailPath = path.join(folderFullPath, "thumbnail.jpg");
+
+      if (fs.existsSync(metadataPath)) {
+        const metadata = JSON.parse(await fs.readFile(metadataPath, "utf8"));
+        metadataFolders.push({
+          name: folder,
+          metadata,
+          thumbnailPath: fs.existsSync(thumbnailPath) ? thumbnailPath : null,
+        });
+      }
+    }
+
+    return metadataFolders;
+  }
+
+  static async archiveFolder(folderPath) {
+    const archivePath = path.join(
+      path.dirname(folderPath),
+      "archive",
+      path.basename(folderPath)
+    );
+    await fs.mkdir(archivePath, { recursive: true });
+    await fs.rename(folderPath, archivePath);
+  }
 }
 
 module.exports = FolderConfigService;

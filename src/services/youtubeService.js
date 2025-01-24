@@ -140,6 +140,41 @@ class YouTubeService {
       throw error;
     }
   }
+
+  async listAllVideos(params) {
+    return this.youtube.search
+      .list({
+        part: ["snippet"],
+        forMine: true,
+        type: "video",
+        maxResults: 50,
+      })
+      .then((response) => response.data.items);
+  }
+
+  async updateVideo(
+    videoId,
+    { title, description, tags, thumbnailPath, privacyStatus, publishAt }
+  ) {
+    console.log("Updating video:", videoId);
+    console.log("Updating video:publishAt", publishAt);
+    return this.youtube.videos.update({
+      part: ["snippet", "status"],
+      requestBody: {
+        id: videoId,
+        snippet: {
+          categoryId: "22", // Required field
+          title: title,
+          description: description,
+          tags: tags,
+        },
+        status: {
+          privacyStatus: privacyStatus,
+          publishAt: publishAt,
+        },
+      },
+    });
+  }
 }
 
 class QuotaExceededError extends Error {
