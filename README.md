@@ -108,6 +108,24 @@ Set `NODE_ENV=development` to simulate uploads without hitting YouTube API.
 - Automatic retries for transient failures
 - Quota exceeded handling with cooldown periods
 
+## How to run
+
+# Schedule videos with 2 hours interval
+
+npm run schedule-videos -- --folders videos-metadata-only/shorts --startTime "2024-01-24T15:00:00Z" --interval 2h
+
+# Schedule videos with 2 hours 30 minutes interval
+
+npm run schedule-videos -- --folders videos-metadata-only/shorts --startTime "2024-01-24T15:00:00Z" --interval 2h30m
+
+# Schedule videos with 2 days 4 hours interval
+
+npm run schedule-videos -- --folders videos-metadata-only/shorts --startTime "2024-01-24T15:00:00Z" --interval 2d4h
+
+# Schedule multiple folders
+
+npm run schedule-videos -- --folders videos-metadata-only/shorts videos-metadata-only/videos --startTime "2024-01-24T15:00:00Z" --interval 1d
+
 ## License
 
 MIT

@@ -158,7 +158,7 @@ class YouTubeService {
   ) {
     console.log("Updating video:", videoId);
     console.log("Updating video:publishAt", publishAt);
-    return this.youtube.videos.update({
+    await this.youtube.videos.update({
       part: ["snippet", "status"],
       requestBody: {
         id: videoId,
@@ -171,9 +171,30 @@ class YouTubeService {
         status: {
           privacyStatus: privacyStatus,
           publishAt: publishAt,
+          selfDeclaredMadeForKids: false,
         },
       },
     });
+
+    console.log("Video updated successfully:", videoId);
+
+    if (thumbnailPath) {
+      console.log("Updating thumbnail:", thumbnailPath);
+
+      try {
+        await this.youtube.thumbnails.set({
+          videoId: videoId,
+          media: {
+            body: fs.createReadStream(thumbnailPath),
+          },
+        });
+        console.log("Thumbnail updated successfully");
+      } catch (error) {
+        console.error("Error updating thumbnail:", error);
+      }
+    }
+
+    return;
   }
 }
 
